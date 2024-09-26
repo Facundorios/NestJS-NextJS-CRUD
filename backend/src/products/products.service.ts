@@ -1,19 +1,30 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+import { Prisma } from '@prisma/client';
 @Injectable()
 export class ProductsService {
   constructor(private prismaService: PrismaService) {}
 
-  create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto) {
     try {
-      return this.prismaService.product.create({
+      return await this.prismaService.product.create({
         data: createProductDto,
       });
     } catch (error) {
-      console.error(error);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException(
+            `Ya existe un producto con el nombre ${createProductDto.name}`,
+          );
+        }
+      }
     }
   }
 
@@ -32,8 +43,15 @@ export class ProductsService {
     return product;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: number, updateProductDto: UpdateProductDto) {
+    const product = await this.prismaService.product.update({
+      where: { id: id },
+      data: updateProductDto,
+    });
+
+    if (!product) throw new NotFoundException(`No existe el producto`);
+
+    return product;
   }
 
   async remove(id: number) {
