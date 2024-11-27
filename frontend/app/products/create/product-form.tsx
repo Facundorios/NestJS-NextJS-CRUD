@@ -16,7 +16,8 @@ export function ProductForm() {
 
   const onSubmit = handleSubmit(async (data) => {
     await createProduct({ ...data, price: parseFloat(data.price) });
-    router.push("/  ");
+    router.push("/");
+    router.refresh();
   });
 
   return (

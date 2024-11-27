@@ -8,5 +8,14 @@ export async function createProduct(productData: any) {
   });
 
   const data = await response.json();
+  return data;
+}
+
+export async function getProducts() {
+  const response = await fetch("http://localhost:4000/api/products", {
+    cache: "no-store",
+  });
+  const data = await response.json();
   console.log(data);
+  return data;
 }

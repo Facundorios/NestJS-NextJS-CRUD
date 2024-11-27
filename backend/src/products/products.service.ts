@@ -32,8 +32,9 @@ export class ProductsService {
     }
   }
 
-  findAll() {
-    return this.prismaService.product.findMany();
+  async findAll() {
+    const products = await this.prismaService.product.findMany();
+    return products;
   }
 
   async findOne(id: number) {
